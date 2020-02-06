@@ -6,7 +6,7 @@
 /*   By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2020/01/15 14:19:59 by dewalter     #+#   ##    ##    #+#       */
-/*   Updated: 2020/01/21 13:39:53 by dewalter    ###    #+. /#+    ###.fr     */
+/*   Updated: 2020/02/05 14:31:14 by dewalter    ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -19,6 +19,11 @@
 #include <sys/mman.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <stdio.h>
+#include "libft.h"
+
+#include <fcntl.h> // don't forget to delete
+
 
 # define TINY 				1
 # define TINY_BYTE_MIN		1
@@ -46,20 +51,24 @@ typedef struct s_ma_chunk
 
 typedef struct      s_region
 {
-	struct s_region	*head;
 	struct s_region	*next;
+	struct s_region	*prev;
 	size_t		    remaining;
-	size_t	        space;
-	// unsigned	    max_chunk_size;
+    size_t          size;
+    // size_t             type;
 }                   t_region;
 
-typedef struct s_ma_heap
-{
-    t_region   *tiny;
-    t_region   *small;
-    t_region   *large;
-}               t_ma_heap;
+t_region *g_region;
+int g_fd;
 
-t_ma_heap g_heap;
+void    *malloc(size_t size);
+void    free(void *ptr);
+void    *realloc(void *ptr, size_t size);
+void    *calloc(size_t count, size_t size);
+
+t_ma_chunk  *search_pointer(t_region *region, void *ptr);
+size_t      get_region_chunk_type(size_t chunk_size);
+void        split_chunk(t_ma_chunk *chunk, size_t chunk_size);
+size_t      get_region_type(size_t region_size);
 
 #endif

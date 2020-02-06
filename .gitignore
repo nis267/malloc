@@ -1,0 +1,5 @@
+obj/
+libft/obj/
+*.so
+test*
+.vscode

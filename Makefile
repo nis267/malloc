@@ -6,7 +6,7 @@
 #    By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+      #
 #                                                  #+#   #+    #+    #+#       #
 #    Created: 2020/01/17 13:06:25 by dewalter     #+#   ##    ##    #+#        #
-#    Updated: 2020/01/17 14:45:38 by dewalter    ###    #+. /#+    ###.fr      #
+#    Updated: 2020/02/04 16:16:32 by dewalter    ###    #+. /#+    ###.fr      #
 #                                                          /                   #
 #                                                         /                    #
 # **************************************************************************** #
@@ -32,27 +32,47 @@ endif
 HNAME := libft_malloc_$(HOSTTYPE).so
 NAME := libft_malloc.so
 
-OBJ :=	obj/malloc.o
+DIR_LIB = ./libft/
+DIR_OBJ = ./obj/
+DIR_SRC = ./src/
+DIR_INC = ./include/
+DIR_INC2 = -I ./include/ -I ./libft/include
+
+OBJ :=	obj/realloc.o \
+		obj/malloc.o \
+		obj/free.o   \
+		obj/realloc.o \
+		obj/calloc.o
 
 FLAGS := -Wall -Wextra -Werror -g -fPIC #-DBONUS=$(BONUS) -rdynamic
 
-all: $(NAME)
+all: $(NAME) lib
+
+lib:
+		@if !(make -q -C $(DIR_LIB)); then \
+			rm -f $(OBJ); \
+			rm -f $(NAME); \
+			make -C $(DIR_LIB);\
+		fi;
 
 $(NAME): $(HNAME)
 	rm -f $@
 	ln -s $< $@
 
 $(HNAME): $(OBJ)
-	gcc $(FLAGS) -shared -o $@ $^
+	@make -C $(DIR_LIB)
+	gcc $(FLAGS) -L $(DIR_LIB) -lft -shared -o $@ $^
 
-obj/%.o: src/%.c include/malloc.h Makefile
+$(DIR_OBJ)%.o: $(DIR_SRC)%.c $(DIR_INC)malloc.h Makefile
 	@mkdir -p obj
-	gcc $(FLAGS) -I inc -o $@ -c $<
+	@gcc -o $@ -c $< $(DIR_INC2) $(FLAGS)
 
 clean:
 	rm -rf obj
+	@make clean -C $(DIR_LIB)
 
-fclean: clean clean_tests
+fclean: clean #clean_tests
 	rm -f $(NAME) $(HNAME)
+	@make fclean -C $(DIR_LIB)
 
 re: fclean all
