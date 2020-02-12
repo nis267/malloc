@@ -6,14 +6,12 @@
 /*   By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2020/01/31 14:30:18 by dewalter     #+#   ##    ##    #+#       */
-/*   Updated: 2020/02/06 15:52:05 by dewalter    ###    #+. /#+    ###.fr     */
+/*   Updated: 2020/02/12 16:30:44 by dewalter    ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
 
 #include "malloc.h"
-#include <stdio.h>
-#include <string.h>
 
 size_t get_chunk_size(size_t size)
 {
@@ -40,16 +38,6 @@ size_t get_region_type(size_t region_size)
         return (SMALL);
     else
         return (LARGE);
-}
-
-size_t get_region_byte_min(region_type)
-{
-    if (region_type == TINY)
-        return (TINY_BYTE_MIN);
-    else if (region_type == SMALL)
-        return (SMALL_BYTE_MIN);
-    else
-        return (LARGE_BYTE_MIN);
 }
 
 size_t get_mmap_size(size_t chunk_size, int region_type)
@@ -127,14 +115,27 @@ void split_chunk(t_ma_chunk *chunk, size_t chunk_size)
     chunk->next = new_chunk;
 }
 
-void *check_free_chunk(t_region *region, size_t region_type, size_t chunk_size, size_t min_size)
+void *get_address(t_ma_chunk *smallest, t_region *region_temp,
+                  size_t chunk_size)
+{
+    if (smallest)
+    {
+        smallest->free = false;
+        return ((void *)(size_t)(smallest + 1));
+    }
+    else if (region_temp)
+        return (add_new_chunk_node(region_temp, chunk_size, 0));
+    return (NULL);
+}
+
+void *check_free_chunk(t_region *region, size_t region_type, size_t chunk_size)
 {
     t_ma_chunk *chunk;
-    t_ma_chunk *smallest_free_chunk;
+    t_ma_chunk *smallest;
     t_region *region_temp;
 
     region_temp = NULL;
-    smallest_free_chunk = NULL;
+    smallest = NULL;
     while (region)
     {
         if (get_region_type(region->size) == region_type)
@@ -143,38 +144,27 @@ void *check_free_chunk(t_region *region, size_t region_type, size_t chunk_size, 
             while (chunk)
             {
                 if (chunk->free == true && (chunk->size >= chunk_size) &&
-                    (smallest_free_chunk == NULL ||
-                     (smallest_free_chunk->size < chunk->size)))
-                    smallest_free_chunk = chunk;
+                    (smallest == NULL ||
+                     (smallest->size < chunk->size)))
+                    smallest = chunk;
                 chunk = chunk->next;
             }
-            if (!smallest_free_chunk && region->remaining >= chunk_size && !region_temp)
+            if (!smallest && region->remaining >= chunk_size && !region_temp)
                 region_temp = region;
         }
         region = region->next;
     }
-    if (smallest_free_chunk)
-    {
-        smallest_free_chunk->free = false;
-        // if (smallest_free_chunk->size > chunk_size && smallest_free_chunk->size >= chunk_size &&
-        //     (smallest_free_chunk->size - chunk_size) > (min_size + sizeof(t_ma_chunk)))
-        //     split_chunk(smallest_free_chunk, chunk_size);
-        min_size = 0;
-        return ((void *)(size_t)(smallest_free_chunk + 1));
-    }
-    else if (region_temp)
-        return (add_new_chunk_node(region_temp, chunk_size, 0));
-    return (NULL);
+    return(get_address(smallest, region_temp, chunk_size));
 }
 
-void *get_free_chunk(size_t chunk_size, int region_type, size_t region_byte_min)
+void *get_free_chunk(size_t chunk_size, int region_type)
 {
     t_region *region;
     void *addr_data;
     size_t mmap_region_size;
 
     if (region_type == LARGE || !(addr_data =
-    check_free_chunk(g_region, region_type, chunk_size, region_byte_min)))
+    check_free_chunk(g_region, region_type, chunk_size)))
     {
         mmap_region_size = get_mmap_size(chunk_size, region_type);
         if ((region = (t_region *)mmap(0, mmap_region_size,
@@ -186,19 +176,29 @@ void *get_free_chunk(size_t chunk_size, int region_type, size_t region_byte_min)
     return (addr_data);
 }
 
+int check_size_limit(size_t size)
+{
+    struct rlimit rlim;
+    int resource;
+
+    resource = RLIMIT_AS;
+    getrlimit(resource, &rlim);
+    if (size > rlim.rlim_cur)
+        return (1);
+    return (0);
+}
+
 void *malloc(size_t size)
 {
     size_t chunk_size;
-    size_t region_byte_min;
     size_t region_type;
     void *addr;
 
     addr = NULL;
-    if ((long int)size < 0)
+    if (check_size_limit(size))
         return (NULL);
     chunk_size = get_chunk_size(size);
     region_type = get_region_chunk_type(chunk_size);
-    region_byte_min = get_region_byte_min(region_type);
-    addr = get_free_chunk(chunk_size, region_type, region_byte_min);
+    addr = get_free_chunk(chunk_size, region_type);
     return (addr);
 }

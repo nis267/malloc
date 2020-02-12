@@ -6,7 +6,7 @@
 #    By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+      #
 #                                                  #+#   #+    #+    #+#       #
 #    Created: 2020/01/17 13:06:25 by dewalter     #+#   ##    ##    #+#        #
-#    Updated: 2020/02/04 16:16:32 by dewalter    ###    #+. /#+    ###.fr      #
+#    Updated: 2020/02/09 14:36:53 by dewalter    ###    #+. /#+    ###.fr      #
 #                                                          /                   #
 #                                                         /                    #
 # **************************************************************************** #
@@ -42,7 +42,8 @@ OBJ :=	obj/realloc.o \
 		obj/malloc.o \
 		obj/free.o   \
 		obj/realloc.o \
-		obj/calloc.o
+		obj/calloc.o \
+		obj/show_alloc_mem.o
 
 FLAGS := -Wall -Wextra -Werror -g -fPIC #-DBONUS=$(BONUS) -rdynamic
 

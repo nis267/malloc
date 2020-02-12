@@ -6,21 +6,12 @@
 /*   By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2020/01/31 14:06:03 by dewalter     #+#   ##    ##    #+#       */
-/*   Updated: 2020/02/06 17:44:44 by dewalter    ###    #+. /#+    ###.fr     */
+/*   Updated: 2020/02/12 16:31:15 by dewalter    ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
 
 #include "malloc.h"
-
-void merge_free_chunks(t_ma_chunk *chunk)
-{
-    t_ma_chunk *chunk_temp;
-
-    while(chunk->prev && chunk->prev->free)
-        chunk = chunk->prev;
-    chunk_temp = chunk;
-}
 
 t_ma_chunk *search_pointer(t_region *region, void *ptr)
 {
@@ -135,11 +126,9 @@ void free_pointer(t_ma_chunk *chunk)
     if (chunk->free == false)
     {
         chunk->free = true;
-        if (check_region_free(region) == true && (get_region_type(region->size) == LARGE || count_regions_type(get_region_type(region->size)) > 1))
+        if (check_region_free(region) == true && (get_region_type(region->size)
+        == LARGE || count_regions_type(get_region_type(region->size)) > 1))
             munmap_region(region);
-        // if ((chunk->prev && chunk->prev->free == true) ||
-        //     (chunk->next && chunk->next->free == true))
-        //     merge_free_chunks(chunk);
     }
 }
 

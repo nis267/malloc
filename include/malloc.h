@@ -6,7 +6,7 @@
 /*   By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2020/01/15 14:19:59 by dewalter     #+#   ##    ##    #+#       */
-/*   Updated: 2020/02/05 14:31:14 by dewalter    ###    #+. /#+    ###.fr     */
+/*   Updated: 2020/02/10 11:58:05 by dewalter    ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -41,6 +41,8 @@
 # define LARGE_BYTE_MIN 	65537
 # define ALIGNMENT          16
 
+# define NB_TYPE_REGION 3
+
 typedef struct s_ma_chunk
 {
     size_t              size;
@@ -70,5 +72,6 @@ t_ma_chunk  *search_pointer(t_region *region, void *ptr);
 size_t      get_region_chunk_type(size_t chunk_size);
 void        split_chunk(t_ma_chunk *chunk, size_t chunk_size);
 size_t      get_region_type(size_t region_size);
+void        show_alloc_mem();
 
 #endif

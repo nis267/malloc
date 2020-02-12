@@ -6,7 +6,7 @@
 /*   By: dewalter <dewalter@student.le-101.fr>      +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2020/01/31 14:30:24 by dewalter     #+#   ##    ##    #+#       */
-/*   Updated: 2020/02/06 10:55:09 by dewalter    ###    #+. /#+    ###.fr     */
+/*   Updated: 2020/02/09 12:19:34 by dewalter    ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -46,7 +46,7 @@ void *realloc(void *ptr, size_t size)
         if ((chunk = search_pointer(g_region, ptr)))
             addr = get_new_allocation(chunk, size);
         else
-            addr = malloc(size);
+            return (NULL);
     }
     return (addr);
 }
